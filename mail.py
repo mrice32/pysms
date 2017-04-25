@@ -31,6 +31,11 @@ username = raw_input('Please enter your gmail username (*@gmail.com): ')
 password = getpass.getpass(prompt='Please enter your gmail password: ')
 phone_number = raw_input('Please enter your ATT cell phone number: ')
 
+# Write stdout to file after prompts
+orig_stdout = sys.stdout
+f = open('pymail_log.txt', 'a')
+sys.stdout = f
+
 M = imaplib.IMAP4_SSL('imap.gmail.com')
 
 
@@ -133,3 +138,7 @@ while True:
     except:
          print "message issues"
          continue
+
+
+sys.stdout = orig_stdout
+f.close()
