@@ -10,6 +10,7 @@ from datetime import datetime
 from datetime import timedelta
 import re
 from subprocess import Popen, PIPE
+from time import sleep
 
 
 
@@ -46,11 +47,17 @@ times_and_messages = [(datetime.now(), "Let's start this shit up.  Send me a rem
 
 while True:
 
+    # TODO function all of this out and make a scheduler to run it every x seconds
+    # TODO maybe get gmail to actively send out notifications when new messages come in
+
     indices = []
     index = 0
     for time_and_message in times_and_messages:
         if time_and_message[0] < datetime.now():
             sendEmail(time_and_message[1], username, password, phone_number)
+            print 'Sent message: ' + time_and_message[1]
+            print 'Meant for time: ' + str(time_and_message[0])
+            print 'Actually sent at: ' + str(datetime.now())
             indices.append(index)
         index = index + 1
 
@@ -119,7 +126,7 @@ while True:
             day = month * 30 + day
             new_time = now + timedelta(weeks=week, days=day, hours=hour, minutes=minute, seconds=second)
 
-            times_and_messages.append((new_time, mini_messages[1]))
+            times_and_messages.append((new_time, '.'.join(mini_messages[1:])))
             
             print msg_data.get_payload()
             
