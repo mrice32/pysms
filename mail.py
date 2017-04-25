@@ -12,6 +12,7 @@ import re
 from subprocess import Popen, PIPE
 
 
+
 def convertToInt(string):
     return int(re.sub("[^0-9]", "", string))
 
@@ -22,23 +23,20 @@ def sendEmail(message, username, password, phone_number):
     server.starttls()
     server.ehlo()
     server.login(username, password)
-    server.sendmail(username + "@gmail.com", phone_number + "@txt.att.net", message)
+    server.sendmail(username, phone_number + "@txt.att.net", message)
 
 
 
-username = raw_input('Please enter your gmail username (*@gmail.com):')
-print 'Please enter your gmail password'
-password = getpass.getpass()
-phone_number = raw_input('Please enter your ATT cell phone number')
+username = raw_input('Please enter your gmail username (*@gmail.com): ')
+password = getpass.getpass(prompt='Please enter your gmail password: ')
+phone_number = raw_input('Please enter your ATT cell phone number: ')
 
 M = imaplib.IMAP4_SSL('imap.gmail.com')
 
 
-M.login(username + '@gmail.com', password) 
+M.login(username + '@gmail.com', password)
 
-print "pre while"
-
-times_and_messages = []
+times_and_messages = [(datetime.now(), "Let's start this shit up.  Send me a reminder n stuffs.")]
 
 
 while True:
@@ -51,15 +49,16 @@ while True:
             indices.append(index)
         index = index + 1
 
-    for i in sorted(indices, reverse = True):
+    for i in sorted(indices, reverse=True):
         del times_and_messages[i]
 
-    print "during while"
     try:
         rv, data = M.select("INBOX")
         if rv != 'OK':
             print "select failed"
             continue
+    except KeyboardInterrupt:
+        break
     except:
         print "exception in select"
         continue
@@ -68,7 +67,6 @@ while True:
     try:
         rv, texts = M.search(None, '(FROM "' + phone_number + '@txt.att.net")')
 
-        print texts
         if rv != 'OK':
             print "Nothing found"
             continue
@@ -97,7 +95,7 @@ while True:
 
             for string in date:
                 if "command" in string:
-                    a=5
+                    pass
                 elif "mo" in string:
                     month = convertToInt(string)
                 elif "w" in string:
@@ -114,13 +112,13 @@ while True:
             now = datetime.now()
             
             day = month * 30 + day
-            new_time = now + timedelta(weeks = week, days = day, hours = hour, minutes = minute, seconds = second)
+            new_time = now + timedelta(weeks=week, days=day, hours=hour, minutes=minute, seconds=second)
 
             times_and_messages.append((new_time, mini_messages[1]))
             
             print msg_data.get_payload()
             
-            my_message = "\nRoger roger."
+            my_message = "\nRoger, roger."
 
             sendEmail(my_message, username, password, phone_number)
 
@@ -129,7 +127,9 @@ while True:
             
 
         M.expunge()
-                   
+
+    except KeyboardInterrupt:
+        break
     except:
          print "message issues"
          continue
