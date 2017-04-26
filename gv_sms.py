@@ -1,11 +1,5 @@
 #!/usr/bin/env python
 
-#
-# SMS test via Google Voice
-#
-# John Nagle
-#   nagle@animats.com
-#
 import BeautifulSoup
 from datetime import datetime
 from datetime import timedelta
