@@ -49,6 +49,8 @@ def convertToInt(string):
     return 0
 
 def sendMessage(voice, message_text, number):
+    print 'Sent message: ' + message_text
+    print 'To: ' + number
     voice.send_sms(number, message_text)
 
 def poll(scheduler, voice):
