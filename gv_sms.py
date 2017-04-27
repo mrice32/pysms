@@ -3,6 +3,7 @@
 import BeautifulSoup
 from datetime import datetime
 from datetime import timedelta
+import getpass
 from googlevoice import Voice
 from googlevoice.util import input
 import sched
@@ -98,29 +99,44 @@ def poll(scheduler, voice):
         sendMessage(voice, outgoing_message, sending_number)
 
     scheduler.enter(10, 2, poll, (scheduler, voice))
+    global fail_count
+    fail_count = 0
 
 
 def main():
-    voice = Voice()
-    voice.login()
+
+    username = raw_input('Please enter your google-voice associated gmail email address: ')
+    password = getpass.getpass(prompt='Please enter your gmail password: ')
 
     # Write stdout to file after prompts
     orig_stdout = sys.stdout
     f = open('pygv_log.txt', 'a')
     sys.stdout = f
-    scheduler = sched.scheduler(time.time, time.sleep)
 
-    try:
-        poll(scheduler, voice)
-        scheduler.run()
+    global fail_count
+    fail_count = 0
+    while fail_count < 4:
+        voice = Voice()
+        voice.login(email=username, passwd=password)
 
-    except:
+        print 'Starting up: ' + str(datetime.now())
+        scheduler = sched.scheduler(time.time, time.sleep)
+
+        try:
+            poll(scheduler, voice)
+            scheduler.run()
+        except KeyboardInterrupt:
+            voice.logout()
+            break
+        except BaseException as e:
+            print 'Ecountered Error at: ' + str(datetime)
+            print 'Error: ' + str(e)
+            print 'Retrying'
+            print 'Error count: ' + str(fail_count)
+            fail_count += 1
+
         voice.logout()
-        sys.stdout = orig_stdout
-        f.close()
-        raise
 
-    voice.logout()
     sys.stdout = orig_stdout
     f.close()
 
